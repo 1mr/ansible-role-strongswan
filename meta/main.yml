@@ -1,5 +1,6 @@
 ---
 galaxy_info:
+  role_name: strongswan
   author: Stas Stavnichuk
   description: install and configure strongswan
   license: MIT

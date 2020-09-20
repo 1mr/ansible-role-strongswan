@@ -1,0 +1,19 @@
+---
+- import_tasks: install.yml
+  tags:
+    - install_strongswan
+    - install
+
+- import_tasks: configure.yml
+  tags:
+    - configure_strongswan
+    - configure
+
+- import_tasks: tunnels.yml
+  when: strongswan|default(None) != None
+  tags:
+    - tunnels
+    - s2s
+    - vpn
+    - s2s_strongswan
+    - vpn_strongswan

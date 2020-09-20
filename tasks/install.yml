@@ -1,0 +1,46 @@
+---
+- name: Install strongswan & ikev2 daemon
+  apt:
+    name:
+      - strongswan
+      - libstrongswan-extra-plugins
+      - libcharon-extra-plugins
+      - haveged
+
+- name: get package facts
+  package_facts: manager=auto strategy=first
+
+- name: create directories
+  file: path={{ item }} state=directory mode=750 owner=root
+  with_items:
+    - /etc/ipsec.conf.d
+    - /etc/ipsec.secrets.d
+    - /var/log/strongswan
+
+- name: change logger config
+  template: src={{ item }}.j2 dest=/etc/strongswan.d/{{ item }} mode=0644
+  with_items:
+    - charon-logging.conf
+
+- name: activate logrotate
+  copy: src=charon dest=/etc/logrotate.d mode=0644
+
+- name: add apparmor local rules
+  template: src={{ item }}.j2 dest=/etc/apparmor.d/local/{{ item }} mode=0644
+  notify: reload apparmor
+  with_items:
+    - usr.lib.ipsec.charon
+  when: "'apparmor' in ansible_facts.packages"
+
+- name: add sysctl entry for ipforward
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    sysctl_set: yes
+    sysctl_file: /etc/sysctl.d/50_ipforward.conf
+    reload: yes
+
+- name: add Lets Encrypt CA cert
+  get_url:
+    url: https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
+    dest: /etc/ipsec.d/cacerts/lets-encrypt-x3-cross-signed.pem

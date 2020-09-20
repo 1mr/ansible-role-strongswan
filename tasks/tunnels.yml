@@ -1,0 +1,58 @@
+---
+- name: add configuration file(s)
+  template: >
+    src={{ item.type|default('s2s') }}.j2
+    dest=/etc/ipsec.conf.d/{{ item.name }}.conf
+    mode=0644
+  with_items: '{{ strongswan | default([]) }}'
+  when: item.state | default('present') == 'present'
+  #no_log: true
+  notify:
+    - reload strongswan
+
+- name: add secrets file(s)
+  template: >
+    src={{ item.type|default('s2s') }}-secret.j2
+    dest=/etc/ipsec.secrets.d/{{ item.name }}.conf
+    mode=0644
+  with_items: '{{ strongswan | default([]) }}'
+  when: item.state | default('present') == 'present'
+  #no_log: true 
+  notify:
+    - reload strongswan
+
+- name: check unmanaged configuration file(s)
+  shell: set -o pipefail && ls -1p /etc/ipsec.conf.d/ | rev | cut -f 2- -d '.' | rev
+  register: unmanaged_files
+  changed_when: false
+
+- name: check unmanaged secrets file(s)
+  shell: set -o pipefail && ls -1p /etc/ipsec.secrets.d/ | rev | cut -f 2- -d '.' | rev
+  register: unmanaged_secrets
+  changed_when: false
+
+- name: whitelist managed configuration file(s)
+  set_fact: managed_files="{{ strongswan | map(attribute='name')|list }}"
+
+- name: whitelist managed secrets file(s)
+  set_fact: managed_secrets="{{ strongswan | map(attribute='name')|list }}"
+
+- name: delete unmanaged configuration file(s)
+  file: >
+    path=/etc/ipsec.conf.d/{{ item }}.conf
+    state=absent
+  with_items: '{{ unmanaged_files.stdout_lines }}'
+  when: item not in managed_files or item.state | default('present') == 'absent'
+  #no_log: true 
+  notify:
+    - reload strongswan
+
+- name: delete unmanaged secrets file(s)
+  file: >
+    path=/etc/ipsec.secrets.d/{{ item }}.conf
+    state=absent
+  with_items: '{{ unmanaged_secrets.stdout_lines }}'
+  when: item not in managed_secrets or item.state | default('present') == 'absent'
+  #no_log: true 
+  notify:
+    - reload strongswan

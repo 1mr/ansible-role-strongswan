@@ -1,0 +1,7 @@
+#{{ ansible_managed }}
+owner @{PROC}/[0-9]*/fd/          r,
+/etc/ipsec.secrets.d/             r,
+/etc/ipsec.secrets.d/**           r,
+/var/log/strongswan/              r,
+/var/log/strongswan/charon.log    rw,
+/etc/letsencrypt/archive/**       r,

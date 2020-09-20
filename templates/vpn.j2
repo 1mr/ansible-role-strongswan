@@ -1,0 +1,34 @@
+#{{ ansible_managed }}
+conn {{ item.name }}
+    keyexchange = ikev2
+    dpdaction = clear
+    dpddelay = 60s
+    dpdtimeout = 300s
+    fragmentation = yes
+    ike = aes256-aes128-sha256-sha1-modp3072-modp2048-modp1024
+    rekey = no
+    left = %any
+    leftsubnet = {{ item.rightsubnet }} 
+    leftcert = {{ item.leftcert | default("fullchain.pem") }} 
+    leftfirewall = yes
+    leftsendcert = always
+    right = %any
+    rightsourceip = {{ item.rightsourceip }} 
+{% if item.rightdns is defined %}
+    rightdns = {{ item.rightdns | default("8.8.8.8,8.8.4.4") }}
+{% endif %}
+    rightsendcert = never
+    eap_identity = %identity
+    
+# BlackBerry, Windows, Android
+conn {{ item.name }}-EAP
+    also = {{ item.name }}
+    rightauth = eap-mschapv2
+    auto = add
+
+# macOS, iOS
+conn {{ item.name }}-Apple
+    also = {{ item.name }}
+    rightauth = eap-mschapv2
+    leftid = @{{ item.leftid | default("{{ inventory_hostname }}") }}
+    auto = add

@@ -1,0 +1,7 @@
+---
+- name: copy configs
+  template: src={{ item }}.j2 dest=/etc/{{ item }} mode=0644
+  notify: restart strongswan
+  with_items:
+    - ipsec.conf
+    - ipsec.secrets

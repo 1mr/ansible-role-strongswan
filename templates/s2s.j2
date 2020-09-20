@@ -1,0 +1,24 @@
+#{{ ansible_managed }}
+conn {{ item.name }}
+    authby = secret
+    auto = route
+    left = {{ item.left }}
+    leftid = {{ item.leftid | default(item.left) }}
+    leftsubnet = {{ item.leftsubnet }}
+    right = {{ item.right }}
+    rightid = {{ item.rightid | default(item.right) }}
+    rightsubnet = {{ item.rightsubnet }}
+    ike = {{ item.ike | default("aes256-sha256-modp2048,aes192-sha256-modp2048,aes128-sha256-modp2048!")}}
+    ikelifetime = {{ item.ikelifetime | default("1d")}}
+    keyexchange = {{ item.keyexchange | default("ikev2") }}
+    esp = {{item.esp | default("aes256-sha256-modp2048,aes192-sha256-modp2048,aes128-sha256-modp2048,aes256-sha1-modp2048,aes192-sha1-modp2048,aes128-sha1-modp2048!") }}
+{% if item.forceencaps is defined %}
+    forceencaps={{ item.forceencaps }}
+{% endif %}
+    lifebytes = 0
+    lifepackets = 0
+    lifetime = {{ item.lifetime | default("8h") }}
+    rekey = yes
+    dpdaction = {{ item.dpdaction | default("restart") }}
+    dpdtimeout = {{ item.dpdtimeout | default("120s") }}
+    dpddelay = {{ item.dpddelay | default("30s") }}

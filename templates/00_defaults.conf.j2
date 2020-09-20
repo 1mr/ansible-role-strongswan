@@ -1,0 +1,10 @@
+#{{ ansible_managed }}
+
+conn %default
+  ikelifetime={{ strongswan_ikelifetime }}
+  keylife={{ strongswan_keylife }}
+  margintime={{ strongswan_margintime }}
+  keyingtries={{ strongswan_keyingtries }}
+  keyexchange={{ strongswan_keyexchange }}
+  authby={{ strongswan_authby }}
+  rekeyfuzz = {{ strongswan_rekeyfuzz }}

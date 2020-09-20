@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: update apt cache
+      apt: update_cache=yes
+    - name: "Include 1mr.strongswan"
+      include_role:
+        name: "1mr.strongswan"
